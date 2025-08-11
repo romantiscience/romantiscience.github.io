@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jesse Young</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      background: white;
+      color: black;
+      overflow-x: hidden;
+    }
+    /* Top row container */
+    #top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      gap: 10px;
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+    }
+    /* Each third */
+    .top-third {
+      flex: 1 1 33%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 120px;
+      position: relative;
+    }
+    /* Center text styling */
+    #name {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      user-select: none;
+      white-space: nowrap;
+    }
+    /* Canvas container for OBJ */
+    #obj-container {
+      width: 100%;
+      max-width: 180px;
+      height: 120px;
+      /* Fix size to keep neat layout */
+    }
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      pointer-events: none;
+    }
+    /* GIF styling */
+    #gif-container img {
+      max-width: 180px;
+      max-height: 120px;
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+      border-radius: 8px;
+    }
+    /* Main container below top row */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      border: 3px solid black;
+      border-radius: 16px;
+      margin: 0 20px 40px;
+      overflow: hidden;
+    }
+    .left {
+      flex: 1 1 300px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .right {
+      flex: 1 1 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+      border-left: 3px solid black;
+      box-sizing: border-box;
+      background-color: white;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      line-height: 1.1;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      border: 2px solid black;
+      background: none;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .tab.active {
+      background: black;
+      color: white;
+    }
+    .content {
+      margin-top: 20px;
+    }
+    .content img {
+      max-width: 100%;
+      max-height: 180px;
+      display: block;
+      margin: 10px 0;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+    canvas#threeCanvas {
+      max-width: 100%;
+      height: auto;
+    }
+    @media (max-width: 700px) {
+      #top-row {
+        flex-direction: column;
+        gap: 15px;
+        max-width: none;
+      }
+      .top-third {
+        max-width: 100%;
+        min-height: auto;
+      }
+      #obj-container, #gif-container img {
+        max-width: 250px;
+        max-height: 180px;
+      }
+      .container {
+        flex-direction: column;
+      }
+      .right {
+        border-left: none;
+        border-top: 3px solid black;
+      }
+      .tabs {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="top-row">
+    <div class="top-third">
+      <div id="obj-container"></div>
+    </div>
+    <div class="top-third" id="name">JESSE YOUNG</div>
+    <div class="top-third" id="gif-container"></div>
+  </div>
+
+  <div class="container">
+    <div class="left">
+      <div class="tabs">
+        <button class="tab active" data-tab="bio">BIO</button>
+        <button class="tab" data-tab="text">TEXT</button>
+        <button class="tab" data-tab="audio">AUDIO</button>
+        <button class="tab" data-tab="video">VIDEO</button>
+        <button class="tab" data-tab="design">DESIGN</button>
+        <button class="tab" data-tab="contact">CONTACT</button>
+      </div>
+      <div class="content" id="content">
+        <h2>BIO</h2>
+        <p>Jesse Young is a creative developer passionate about interactive media.</p>
+        <img src="head.png" alt="Jesse Young" />
+        <p>Visit my <a href="https://portfolio.example.com" target="_blank" rel="noopener">portfolio</a> or check my <a href="https://github.com/jesseyoung" target="_blank" rel="noopener">GitHub</a>.</p>
+      </div>
+    </div>
+    <div class="right">
+      <canvas id="threeCanvas"></canvas>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+    import { OBJLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/OBJLoader.js';
+
+    // --- Random files from folders ---
+    // You must fill these arrays with your actual files (relative paths)
+    const objFiles = [
+      '/obj/model1.obj',
+      '/obj/model2.obj',
+      '/obj/model3.obj',
+    ];
+    const gifFiles = [
+      '/gif/anim1.gif',
+      '/gif/anim2.gif',
+      '/gif/anim3.gif',
+    ];
+
+    // --- Setup 3D OBJ Left ---
+    const objContainer = document.getElementById('obj-container');
+    let objRenderer, objScene, objCamera, objModel, objAnimationId;
+
+    function initObjScene() {
+      objRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      objRenderer.setClearColor(0x000000, 0); // transparent
+      objRenderer.setSize(objContainer.clientWidth, objContainer.clientHeight);
+      objContainer.appendChild(objRenderer.domElement);
+
+      objScene = new THREE.Scene();
+      objCamera = new THREE.PerspectiveCamera(45, objContainer.clientWidth / objContainer.clientHeight, 0.1, 1000);
+      objCamera.position.z = 5;
+
+      // Ambient light for subtle lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+      objScene.add(ambientLight);
+    }
+
+    function loadRandomOBJ() {
+      if (objModel) {
+        objScene.remove(objModel);
+        objModel.traverse(child => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(mat => mat.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+        objModel = null;
+      }
+      const loader = new OBJLoader();
+      const randomObj = objFiles[Math.floor(Math.random() * objFiles.length)];
+      loader.load(randomObj,
+        function (object) {
+          objModel = object;
+          objModel.rotation.x = 0;
+          objModel.rotation.y = 0;
+          // Scale to fit container nicely
+          let box = new THREE.Box3().setFromObject(objModel);
+          let size = new THREE.Vector3();
+          box.getSize(size);
+          let maxDim = Math.max(size.x, size.y, size.z);
+          let scale = 2 / maxDim; // fit roughly inside box
+          objModel.scale.set(scale, scale, scale);
+          objScene.add(objModel);
+        },
+        undefined,
+        function (error) {
+          console.error('Error loading OBJ:', error);
+        }
+      );
+    }
+
+    function animateObj() {
+      objAnimationId = requestAnimationFrame(animateObj);
+      if (objModel) {
+        objModel.rotation.y += 0.01;
+        objModel.rotation.x += 0.005;
+      }
+      objRenderer.render(objScene, objCamera);
+    }
+
+    function onObjResize() {
+      if (!objRenderer) return;
+      const width = objContainer.clientWidth;
+      const height = objContainer.clientHeight;
+      objRenderer.setSize(width, height);
+      objCamera.aspect = width / height;
+      objCamera.updateProjectionMatrix();
+    }
+
+    window.addEventListener('resize', () => {
+      onObjResize();
+    });
+
+    // --- Random GIF Right ---
+    const gifContainer = document.getElementById('gif-container');
+    function loadRandomGif() {
+      gifContainer.innerHTML = '';
+      const randomGif = gifFiles[Math.floor(Math.random() * gifFiles.length)];
+      const img = document.createElement('img');
+      img.src = randomGif;
+      img.alt = 'Random GIF';
+      gifContainer.appendChild(img);
+    }
+
+    // --- Center canvas below for tabs ---
+    const canvas = document.getElementById('threeCanvas');
+
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+
+    resizeCanvas();
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      renderer.setSize(canvas.width, canvas.height);
+      camera.aspect = canvas.width / canvas.height;
+      camera.updateProjectionMatrix();
+    });
+
+    // --- Three.js for tab shapes ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, canvas.width / canvas.height, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(canvas.width, canvas.height);
+    camera.position.z = 5;
+
+    let object;
+
+    function clearScene() {
+      if (object) {
+        scene.remove(object);
+        object.geometry.dispose();
+        object.material.dispose();
+        object = null;
+      }
+    }
+
+    const tabData = {
+      bio: {
+        text: `
+          <p>Jesse Young is a creative developer passionate about interactive media.</p>
+          <img src="head.png" alt="Jesse Young" />
+          <p>Visit my <a href="https://portfolio.example.com" target="_blank" rel="noopener">portfolio</a> or check my <a href="https://github.com/jesseyoung" target="_blank" rel="noopener">GitHub</a>.</p>
+        `,
+        geometry: () => new THREE.IcosahedronGeometry(1.2, 1),
+      },
+      text: {
+        text: `
+          <p>Jesse writes compelling content blending storytelling and technology.</p>
+          <img src="https://via.placeholder.com/300x180?text=Text+Work" alt="Text Work" />
+          <p>Read my <a href="https://medium.com/@jesseyoung" target="_blank" rel="noopener">Medium articles</a>.</p>
+        `,
+        geometry: () => new THREE.TorusKnotGeometry(1, 0.3, 100, 16),
+      },
+      audio: {
+        text: `
+          <p>Jesse produces immersive audio experiences and sound designs.</p>
+          <img src="https://via.placeholder.com/300x180?text=Audio+Work" alt="Audio Work" />
+          <p>Listen on my <a href="https://soundcloud.com/jesseyoung" target="_blank" rel="noopener">SoundCloud</a>.</p>
+        `,
+        geometry: () => new THREE.CylinderGeometry(0.1, 0.1, 3, 32, 1, true),
+      },
+      video: {
+        text: `
+          <p>Jesse creates dynamic videos and animations with innovative techniques.</p>
+          <img src="https://via.placeholder.com/300x180?text=Video+Work" alt="Video Work" />
+          <p>Watch on my <a href="https://vimeo.com/jesseyoung" target="_blank" rel="noopener">Vimeo channel</a>.</p>
+        `,
+        geometry: () => new THREE.BoxGeometry(2, 1, 0.1, 10, 5, 1),
+      },
+      design: {
+        text: `
+          <p>Jesse explores visual design through geometry and interactive elements.</p>
+          <img src="https://via.placeholder.com/300x180?text=Design+Work" alt="Design Work" />
+          <p>See my designs on <a href="https://dribbble.com/jesseyoung" target="_blank" rel="noopener">Dribbble</a>.</p>
+        `,
+        geometry: () => new THREE.CircleGeometry(1.5, 6),
+      },
+      contact: {
+        text: `
+          <p>Get in touch with Jesse for projects, collaborations, or inquiries.</p>
+                    <p>Email: <a href="mailto:jesse.young@example.com">jesse.young@example.com</a></p>
+          <p>Follow me on <a href="https://twitter.com/jesseyoung" target="_blank" rel="noopener">Twitter</a> and <a href="https://linkedin.com/in/jesseyoung" target="_blank" rel="noopener">LinkedIn</a>.</p>
+        `,
+        geometry: () => new THREE.OctahedronGeometry(1.2),
+      }
+    };
+
+    function createWireframe(type) {
+      clearScene();
+      if (!tabData[type]) return;
+      const geometry = tabData[type].geometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+      object = new THREE.Mesh(geometry, material);
+      scene.add(object);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (object) {
+        object.rotation.x += 0.01;
+        object.rotation.y += 0.01;
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const tabName = tab.dataset.tab;
+        const content = document.getElementById('content');
+        content.innerHTML = `<h2>${tabName.toUpperCase()}</h2>` + tabData[tabName].text;
+
+        createWireframe(tabName);
+
+        // Change top left OBJ and right GIF randomly on tab click as well
+        loadRandomOBJ();
+        loadRandomGif();
+      });
+    });
+
+    // Initialize scenes
+    initObjScene();
+    loadRandomOBJ();
+    loadRandomGif();
+
+    // Start animating the OBJ
+    animateObj();
+
+    // Handle window resizing for OBJ container
+    window.addEventListener('resize', () => {
+      onObjResize();
+    });
+  </script>
+
+</body>
+</html>
