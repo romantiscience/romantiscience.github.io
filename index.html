@@ -61,6 +61,14 @@
   .content {
     margin-top: 20px;
   }
+  .content img {
+    max-width: 100%;
+    max-height: 180px;
+    display: block;
+    margin: 10px 0;
+    border-radius: 8px;
+    object-fit: contain;
+  }
   canvas {
     display: block;
     max-width: 100%;
@@ -96,6 +104,8 @@
     <div class="content" id="content">
       <h2>BIO</h2>
       <p>Jesse Young is a creative developer passionate about interactive media.</p>
+      <img src="head.png" alt="Jesse Young" />
+      <p>Visit my <a href="https://portfolio.example.com" target="_blank" rel="noopener">portfolio</a> or check my <a href="https://github.com/jesseyoung" target="_blank" rel="noopener">GitHub</a>.</p>
     </div>
   </div>
   <div class="right">
@@ -141,27 +151,51 @@
 
   const tabData = {
     bio: {
-      text: "Jesse Young is a creative developer passionate about interactive media.",
+      text: `
+        <p>Jesse Young is a creative developer passionate about interactive media.</p>
+        <img src="head.png" alt="Jesse Young" />
+        <p>Visit my <a href="https://portfolio.example.com" target="_blank" rel="noopener">portfolio</a> or check my <a href="https://github.com/jesseyoung" target="_blank" rel="noopener">GitHub</a>.</p>
+      `,
       geometry: () => new THREE.IcosahedronGeometry(1.2, 1),
     },
     text: {
-      text: "Jesse writes compelling content that blends storytelling with technology.",
+      text: `
+        <p>Jesse writes compelling content blending storytelling and technology.</p>
+        <img src="https://via.placeholder.com/300x180?text=Text+Work" alt="Text Work" />
+        <p>Read my <a href="https://medium.com/@jesseyoung" target="_blank" rel="noopener">Medium articles</a>.</p>
+      `,
       geometry: () => new THREE.TorusKnotGeometry(1, 0.3, 100, 16),
     },
     audio: {
-      text: "Jesse produces immersive audio experiences and sound design.",
+      text: `
+        <p>Jesse produces immersive audio experiences and sound designs.</p>
+        <img src="https://via.placeholder.com/300x180?text=Audio+Work" alt="Audio Work" />
+        <p>Listen on my <a href="https://soundcloud.com/jesseyoung" target="_blank" rel="noopener">SoundCloud</a>.</p>
+      `,
       geometry: () => new THREE.CylinderGeometry(0.1, 0.1, 3, 32, 1, true),
     },
     video: {
-      text: "Jesse creates dynamic videos and animations with innovative techniques.",
+      text: `
+        <p>Jesse creates dynamic videos and animations with innovative techniques.</p>
+        <img src="https://via.placeholder.com/300x180?text=Video+Work" alt="Video Work" />
+        <p>Watch on my <a href="https://vimeo.com/jesseyoung" target="_blank" rel="noopener">Vimeo channel</a>.</p>
+      `,
       geometry: () => new THREE.BoxGeometry(2, 1, 0.1, 10, 5, 1),
     },
     design: {
-      text: "Jesse explores visual design through geometry and interactive elements.",
+      text: `
+        <p>Jesse explores visual design through geometry and interactive elements.</p>
+        <img src="https://via.placeholder.com/300x180?text=Design+Work" alt="Design Work" />
+        <p>See my designs on <a href="https://dribbble.com/jesseyoung" target="_blank" rel="noopener">Dribbble</a>.</p>
+      `,
       geometry: () => new THREE.CircleGeometry(1.5, 6),
     },
     contact: {
-      text: "Get in touch with Jesse for projects, collaborations, or inquiries.",
+      text: `
+        <p>Get in touch with Jesse for projects, collaborations, or inquiries.</p>
+        <img src="https://via.placeholder.com/300x180?text=Contact" alt="Contact" />
+        <p>Email me at <a href="mailto:jesse.young@example.com">jesse.young@example.com</a> or follow on <a href="https://twitter.com/jesseyoung" target="_blank" rel="noopener">Twitter</a>.</p>
+      `,
       geometry: () => new THREE.OctahedronGeometry(1.2),
     },
   };
@@ -191,12 +225,13 @@
 
       const tabName = tab.dataset.tab;
       const content = document.getElementById('content');
-      content.innerHTML = `<h2>${tabName.toUpperCase()}</h2><p>${tabData[tabName]?.text || ''}</p>`;
+      content.innerHTML = `<h2>${tabName.toUpperCase()}</h2>${tabData[tabName]?.text || ''}`;
 
       createWireframe(tabName);
     });
   });
 
+  // Initialize on page load
   createWireframe('bio');
 </script>
 
