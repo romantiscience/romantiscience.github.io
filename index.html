@@ -1,182 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jesse Young</title>
 <style>
-    body {
-        margin: 0;
-        font-family: 'Courier New', monospace;
-        background-color: white;
-        color: black;
-    }
+  body {
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    background-color: white;
+    color: black;
+  }
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    border: 3px solid black;
+    border-radius: 16px;
+    margin: 20px;
+    overflow: hidden;
+  }
+  .left {
+    flex: 1 1 300px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .right {
+    flex: 1 1 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    border-left: 3px solid black;
+    box-sizing: border-box;
+    background-color: white;
+  }
+  h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    line-height: 1.1;
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .tab {
+    padding: 8px 16px;
+    border: 2px solid black;
+    background: none;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .tab.active {
+    background: black;
+    color: white;
+  }
+  .content {
+    margin-top: 20px;
+  }
+  canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  @media (max-width: 700px) {
     .container {
-        display: flex;
-        flex-wrap: wrap;
-        border: 3px solid black;
-        border-radius: 16px;
-        margin: 20px;
-        overflow: hidden;
-    }
-    .left {
-        flex: 1 1 300px;
-        padding: 20px;
-        box-sizing: border-box;
+      flex-direction: column;
     }
     .right {
-        flex: 1 1 300px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 300px;
-        border-left: 3px solid black;
-        box-sizing: border-box;
-        background-color: white;
-    }
-    h1 {
-        font-size: 2.5rem;
-        margin: 0;
-        line-height: 1.1;
+      border-left: none;
+      border-top: 3px solid black;
     }
     .tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 20px;
+      justify-content: flex-start;
     }
-    .tab {
-        padding: 8px 16px;
-        border: 2px solid black;
-        background: none;
-        font-size: 1rem;
-        cursor: pointer;
-        border-radius: 8px;
-        transition: background 0.2s;
-    }
-    .tab.active {
-        background: black;
-        color: white;
-    }
-    .content {
-        margin-top: 20px;
-    }
-    canvas {
-        display: block;
-        max-width: 100%;
-        height: auto;
-    }
-    @media (max-width: 700px) {
-        .container {
-            flex-direction: column;
-        }
-        .right {
-            border-left: none;
-            border-top: 3px solid black;
-        }
-        .tabs {
-            justify-content: flex-start;
-        }
-    }
+  }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="left">
-        <h1>JESSE<br>YOUNG</h1>
-        <div class="tabs">
-            <button class="tab active" data-tab="bio">BIO</button>
-            <button class="tab" data-tab="text">TEXT</button>
-            <button class="tab" data-tab="audio">AUDIO</button>
-            <button class="tab" data-tab="video">VIDEO</button>
-            <button class="tab" data-tab="design">DESIGN</button>
-            <button class="tab" data-tab="contact">CONTACT</button>
-        </div>
-        <div class="content" id="content">
-            <h2>BIO</h2>
-            <p>Information about Jesse Young.</p>
-        </div>
+  <div class="left">
+    <h1>JESSE<br />YOUNG</h1>
+    <div class="tabs">
+      <button class="tab active" data-tab="bio">BIO</button>
+      <button class="tab" data-tab="text">TEXT</button>
+      <button class="tab" data-tab="audio">AUDIO</button>
+      <button class="tab" data-tab="video">VIDEO</button>
+      <button class="tab" data-tab="design">DESIGN</button>
+      <button class="tab" data-tab="contact">CONTACT</button>
     </div>
-    <div class="right">
-        <canvas id="threeCanvas"></canvas>
+    <div class="content" id="content">
+      <h2>BIO</h2>
+      <p>Jesse Young is a creative developer passionate about interactive media.</p>
     </div>
+  </div>
+  <div class="right">
+    <canvas id="threeCanvas"></canvas>
+  </div>
 </div>
 
 <script type="module">
-    import * as THREE from './js/three.module.min.js';
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
 
-    const canvas = document.getElementById('threeCanvas');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    camera.position.z = 5;
+  const canvas = document.getElementById('threeCanvas');
 
-    let object;
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
 
-    function clearScene() {
-        if (object) {
-            scene.remove(object);
-            object.geometry.dispose();
-            object.material.dispose();
-        }
+  resizeCanvas();
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    renderer.setSize(canvas.width, canvas.height);
+    camera.aspect = canvas.width / canvas.height;
+    camera.updateProjectionMatrix();
+  });
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, canvas.width / canvas.height, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(canvas.width, canvas.height);
+  camera.position.z = 5;
+
+  let object;
+
+  function clearScene() {
+    if (object) {
+      scene.remove(object);
+      object.geometry.dispose();
+      object.material.dispose();
+      object = null;
     }
+  }
 
-    function createWireframe(type) {
-        clearScene();
-        let geometry;
-        switch(type) {
-            case 'bio':
-                geometry = new THREE.IcosahedronGeometry(1.2, 1); // placeholder "head" shape
-                break;
-            case 'text':
-                geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
-                break;
-            case 'audio':
-                geometry = new THREE.CylinderGeometry(0.1, 0.1, 3, 32, 1, true);
-                break;
-            case 'video':
-                geometry = new THREE.BoxGeometry(2, 1, 0.1, 10, 5, 1);
-                break;
-            case 'design':
-                geometry = new THREE.CircleGeometry(1.5, 6);
-                break;
-            case 'contact':
-                geometry = new THREE.OctahedronGeometry(1.2);
-                break;
-        }
-        const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
-        object = new THREE.Mesh(geometry, material);
-        scene.add(object);
+  const tabData = {
+    bio: {
+      text: "Jesse Young is a creative developer passionate about interactive media.",
+      geometry: () => new THREE.IcosahedronGeometry(1.2, 1),
+    },
+    text: {
+      text: "Jesse writes compelling content that blends storytelling with technology.",
+      geometry: () => new THREE.TorusKnotGeometry(1, 0.3, 100, 16),
+    },
+    audio: {
+      text: "Jesse produces immersive audio experiences and sound design.",
+      geometry: () => new THREE.CylinderGeometry(0.1, 0.1, 3, 32, 1, true),
+    },
+    video: {
+      text: "Jesse creates dynamic videos and animations with innovative techniques.",
+      geometry: () => new THREE.BoxGeometry(2, 1, 0.1, 10, 5, 1),
+    },
+    design: {
+      text: "Jesse explores visual design through geometry and interactive elements.",
+      geometry: () => new THREE.CircleGeometry(1.5, 6),
+    },
+    contact: {
+      text: "Get in touch with Jesse for projects, collaborations, or inquiries.",
+      geometry: () => new THREE.OctahedronGeometry(1.2),
+    },
+  };
+
+  function createWireframe(type) {
+    clearScene();
+    const geometry = tabData[type]?.geometry() || new THREE.BoxGeometry(1,1,1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+    object = new THREE.Mesh(geometry, material);
+    scene.add(object);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (object) {
+      object.rotation.x += 0.01;
+      object.rotation.y += 0.01;
     }
+    renderer.render(scene, camera);
+  }
+  animate();
 
-    function animate() {
-        requestAnimationFrame(animate);
-        if (object) {
-            object.rotation.x += 0.01;
-            object.rotation.y += 0.01;
-        }
-        renderer.render(scene, camera);
-    }
-    animate();
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
 
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+      const tabName = tab.dataset.tab;
+      const content = document.getElementById('content');
+      content.innerHTML = `<h2>${tabName.toUpperCase()}</h2><p>${tabData[tabName]?.text || ''}</p>`;
 
-            const tabName = tab.dataset.tab;
-            const content = document.getElementById('content');
-            content.innerHTML = `<h2>${tabName.toUpperCase()}</h2><p>Content for ${tabName}.</p>`;
-
-            createWireframe(tabName);
-        });
+      createWireframe(tabName);
     });
+  });
 
-    // Initialize with BIO shape
-    createWireframe('bio');
+  createWireframe('bio');
 </script>
 
 </body>
