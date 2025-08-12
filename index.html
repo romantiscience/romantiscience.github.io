@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Jesse Young — Portfolio</title>
+<style>
+  :root{
+    --header-h:68px;
+    --accent-blue:#1e90ff;
+    --accent-green:#00ff7f;
+    --accent-yellow:#ffff00;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+  }
+  html,body{height:100%;margin:0;background:#000;color:#fff;overflow:hidden;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+
+  /* Top bar (white bar as requested) */
+  header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:#fff;color:#000;display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:220;border-bottom:1px solid #e6e6e6}
+  header .title{font-weight:900;font-family:var(--mono);font-size:2rem;color:#111}
+  header .menu-btn{cursor:pointer;font-weight:700;font-family:var(--mono);color:var(--accent-blue)}
+
+  /* subtitle small and less prominent */
+  .subtitle{position:fixed;left:22px;top:calc(var(--header-h) + 8px);font-family:var(--mono);font-size:13px;color:var(--accent-green);z-index:210}
+
+  /* canvas occupies full viewport under header */
+  canvas{position:fixed;inset:0;display:block;z-index:0}
+
+  /* nav & panel as before */
+  nav{position:fixed;top:var(--header-h);right:-300px;width:260px;height:calc(100% - var(--header-h));background:rgba(255,255,255,0.96);color:#000;box-shadow:-12px 0 30px rgba(0,0,0,0.12);padding:18px;box-sizing:border-box;transition:right .28s ease;z-index:230}
+  nav.open{right:0}
+  nav a{display:block;color:#111;text-decoration:none;font-weight:700;margin:10px 0}
+
+  .panel{position:fixed;top:var(--header-h);right:0;height:calc(100% - var(--header-h));width:40%;max-width:680px;min-width:320px;transform:translateX(110%);transition:transform .28s ease;z-index:240;background:rgba(8,10,12,0.6);backdrop-filter:blur(6px);padding:22px;box-sizing:border-box}
+  .panel.open{transform:translateX(0)}
+  .panel .panel-head{font-family:var(--mono);font-size:16px;color:var(--accent-blue);margin-bottom:8px}
+  .panel .panel-body{font-size:15px;line-height:1.45;color:#e6eef0}
+
+  @media (max-width:900px){
+    .panel{width:100%}
+    nav{width:220px}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="title">Jesse Young</div>
+    <div class="menu-btn">works ▾</div>
+  </header>
+
+  <div class="subtitle">Jesse Young — portfolio · 3D wireframe camera · dual view</div>
+
+  <nav aria-label="sites navigation"></nav>
+
+  <aside class="panel" role="dialog" aria-hidden="true">
+    <button class="close" aria-label="close panel">×</button>
+    <div class="panel-content">
+      <div class="panel-head">Welcome</div>
+      <div class="panel-body">
+        <p>Click <strong>works</strong> to open the menu and choose a section. Selected content will appear here over the animation.</p>
+      </div>
+    </div>
+  </aside>
+
+  <canvas id="glcanvas"></canvas>
+
+  <script>
+  // simple nav + panel (tabs)
+  (function(){
+    const menuBtn=document.querySelector('.menu-btn');
+    const nav=document.querySelector('nav');
+    const panel=document.querySelector('.panel');
+    const panelContent=panel.querySelector('.panel-content');
+    const closeBtn=panel.querySelector('.close');
+    const tabs=['New','Bio','Design','Text','Audio','Video','Contact'];
+    nav.innerHTML=tabs.map(t=>`<a href="#" data-tab="${t}">${t}</a>`).join('');
+    function showPanel(tab){
+      panel.classList.add('open');panel.setAttribute('aria-hidden','false');
+      panelContent.innerHTML = `<div class="panel-head">${tab}</div><div class="panel-body"><p>Jesse Young — ${tab}</p><p>Example content for ${tab}. Add projects, links and details here.</p></div>`;
+    }
+    menuBtn.addEventListener('click', ()=> nav.classList.toggle('open'));
+    nav.addEventListener('click', e=>{const a=e.target.closest('a'); if(!a) return; e.preventDefault(); showPanel(a.dataset.tab); nav.classList.remove('open');});
+    closeBtn.addEventListener('click', ()=>{ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); });
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape'){ panel.classList.remove('open'); nav.classList.remove('open'); }});
+  })();
+  </script>
+
+  <!-- three.js and scene: two views (top & side), improved camera geometry and rotation + gentle zoom -->
+  <script src="https://unpkg.com/three@0.152.0/build/three.min.js"></script>
+  <script>
+  (function(){
+    const canvas = document.getElementById('glcanvas');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 1);
+    renderer.setScissorTest(true);
+
+    const scene = new THREE.Scene();
+
+    // Create a camera-like model using wireframe line segments for a clean retro look
+    const cameraModel = new THREE.Group();
+
+    // body (rectangular box) - white
+    const bodyW = 3.4, bodyH = 1.9, bodyD = 1.6;
+    const bodyGeo = new THREE.BoxGeometry(bodyW, bodyH, bodyD);
+    const bodyWire = new THREE.LineSegments(new THREE.WireframeGeometry(bodyGeo), new THREE.LineBasicMaterial({color:0xffffff}));
+    cameraModel.add(bodyWire);
+
+    // lens mount - outer ring (slightly extruded cylinder) - white outline
+    const mountOuter = new THREE.CylinderGeometry(0.85,0.85,0.25,32);
+    mountOuter.rotateX(Math.PI/2);
+    mountOuter.translate(0,0,bodyD/2 + 0.125);
+    const mountWire = new THREE.LineSegments(new THREE.WireframeGeometry(mountOuter), new THREE.LineBasicMaterial({color:0xffffff}));
+    cameraModel.add(mountWire);
+
+    // inner lens element: green
+    const lensInner = new THREE.CylinderGeometry(0.45,0.45,0.2,24);
+    lensInner.rotateX(Math.PI/2);
+    lensInner.translate(0,0,bodyD/2 + 0.25);
+    const lensWire = new THREE.LineSegments(new THREE.WireframeGeometry(lensInner), new THREE.LineBasicMaterial({color:0x00ff7f}));
+    cameraModel.add(lensWire);
+
+    // viewfinder on top (small box) - white
+    const vfGeo = new THREE.BoxGeometry(0.6,0.25,0.4);
+    vfGeo.translate(-0.9, bodyH/2 + 0.125, 0);
+    const vfWire = new THREE.LineSegments(new THREE.WireframeGeometry(vfGeo), new THREE.LineBasicMaterial({color:0xffffff}));
+    cameraModel.add(vfWire);
+
+    // small detail: shutter button (blue) - moved to sit above the body
+    const btnGeo = new THREE.BoxGeometry(0.15,0.05,0.3);
+    // place the button just above the top surface of the camera body, near the right edge
+    btnGeo.translate(1.25, bodyH/2 + 0.14, 0.45);
+    const btnWire = new THREE.LineSegments(new THREE.WireframeGeometry(btnGeo), new THREE.LineBasicMaterial({color:0x1e90ff}));
+    cameraModel.add(btnWire);
+
+    // center the model
+    cameraModel.position.set(0, 0, 0);
+    scene.add(cameraModel);
+
+    // two view cameras: left = top-ish angled view, right = side-ish angled view
+    const camLeft = new THREE.PerspectiveCamera(45, (window.innerWidth/2)/window.innerHeight, 0.1, 100);
+    camLeft.position.set(0, 5.6, 5); // higher and a bit in front so lens reads well in top view
+    camLeft.lookAt(0, 0, 0);
+
+    const camRight = new THREE.PerspectiveCamera(45, (window.innerWidth/2)/window.innerHeight, 0.1, 100);
+    camRight.position.set(6.5, 1.8, 2.2); // side / 3/4 angle
+    camRight.lookAt(0, 0, 0);
+
+    // gentle lighting (not necessary for wireframes but gives depth if ever changed)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.6); dl.position.set(5, 10, 7); scene.add(dl);
+
+    // interaction: drag to rotate, wheel to zoom both view cameras
+    let dragging=false, lastX=0, lastY=0;
+    function startDrag(e){ dragging=true; const p=(e.touches && e.touches[0]) || e; lastX=p.clientX; lastY=p.clientY; }
+    function moveDrag(e){ if(!dragging) return; const p=(e.touches && e.touches[0]) || e; const dx=(p.clientX-lastX)*0.005; const dy=(p.clientY-lastY)*0.005; cameraModel.rotation.y += dx; cameraModel.rotation.x = Math.max(-0.4, Math.min(0.4, cameraModel.rotation.x + dy)); lastX=p.clientX; lastY=p.clientY; }
+    function endDrag(){ dragging=false; }
+    window.addEventListener('pointerdown', startDrag); window.addEventListener('pointermove', moveDrag); window.addEventListener('pointerup', endDrag);
+    window.addEventListener('touchstart', startDrag, {passive:true}); window.addEventListener('touchmove', moveDrag, {passive:true}); window.addEventListener('touchend', endDrag);
+
+    // wheel zoom (each camera moves outward/inward a bit)
+    window.addEventListener('wheel', (ev)=>{
+      const delta = Math.sign(ev.deltaY) * 0.6;
+      camLeft.position.multiplyScalar(1 + delta*0.02);
+      camRight.position.multiplyScalar(1 + delta*0.02);
+    }, {passive:true});
+
+    function onWindowResize(){
+      const w = window.innerWidth, h = window.innerHeight;
+      renderer.setSize(w, h);
+      const aspect = (w/2)/h;
+      camLeft.aspect = aspect; camLeft.updateProjectionMatrix();
+      camRight.aspect = aspect; camRight.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', onWindowResize);
+
+    // subtle autonomous motion so the model reads in both views
+    const clock = new THREE.Clock();
+    function animate(){
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // autonomous slow rotation around vertical axis (small amplitude)
+      cameraModel.rotation.y += 0.002;
+
+      // slight breathing (scale) to make wireframe feel alive but subtle
+      const scale = 1 + Math.sin(t*0.6) * 0.0025;
+      cameraModel.scale.set(scale, scale, scale);
+
+      // layout split-screen
+      const w = window.innerWidth, h = window.innerHeight;
+      const half = Math.floor(w / 2);
+
+      // left view (top-ish)
+      renderer.setViewport(0, 0, half, h);
+      renderer.setScissor(0, 0, half, h);
+      renderer.render(scene, camLeft);
+
+      // right view (side-ish)
+      renderer.setViewport(half, 0, w - half, h);
+      renderer.setScissor(half, 0, w - half, h);
+      renderer.render(scene, camRight);
+    }
+
+    // initial resize + animate
+    onWindowResize();
+    animate();
+
+    // expose for debugging
+    window._CAM = { renderer, scene, cameraModel, camLeft, camRight };
+  })();
+  </script>
+</body>
+</html>
