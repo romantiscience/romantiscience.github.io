@@ -169,11 +169,11 @@ function showPanel(tab){
     const container = document.getElementById('text-pdf-container');
     if(container){
       container.innerHTML = ''; // Clear any existing iframe
-      const textFileId = '1Bvj3KRmyQWKjkRiKAv0hAH6b8eaDEK63'; // Replace with your Google Drive file ID
+      const textFileId = '1w0q54fgXkgNNL3IG_S7QzNR6hY9IyUZ_'; // Replace with your Google Drive file ID
       const iframe = document.createElement('iframe');
       iframe.src = `https://drive.google.com/file/d/${textFileId}/preview`;
-      iframe.width = "100%";
-      iframe.height = "800";
+      iframe.width = "75%";
+      iframe.height = "600";
       iframe.style.border = "none";
       container.appendChild(iframe);
     }
@@ -184,11 +184,11 @@ function showPanel(tab){
     const container = document.getElementById('design-pdf-container');
     if(container){
       container.innerHTML = ''; // Clear any existing iframe
-      const designFileId = '1Bvj3KRmyQWKjkRiKAv0hAH6b8eaDEK63'; // Replace with your Google Drive file ID
+      const designFileId = '13UvLYiOjgpg65DF_7QF_Dql0PqamwhN2'; // Replace with your Google Drive file ID
       const iframe = document.createElement('iframe');
       iframe.src = `https://drive.google.com/file/d/${designFileId}/preview`;
-      iframe.width = "100%";
-      iframe.height = "800";
+      iframe.width = "75%";
+      iframe.height = "600";
       iframe.style.border = "none";
       container.appendChild(iframe);
     }
