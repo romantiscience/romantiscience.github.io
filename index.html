@@ -325,5 +325,33 @@ a:hover {
     window._CAM = { renderer, scene, cameraModel, camLeft, camRight };
   })();
   </script>
+  <script>
+function showRandomGif() {
+  if (Math.random() > 0.25) return; // 25% chance
+
+  const gif = document.getElementById('randomGif');
+
+  // Random size 30%-100%
+  const sizePercent = Math.random() * 70 + 30;
+  gif.style.width = sizePercent + '%';
+  gif.style.height = 'auto';
+
+  // Random rotation
+  const rotation = Math.random() * 360;
+  gif.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+
+  // Random duration 1-5 seconds
+  const duration = Math.random() * 4000 + 1000;
+
+  gif.style.display = 'block';
+
+  setTimeout(() => {
+    gif.style.display = 'none';
+  }, duration);
+}
+
+window.addEventListener('load', showRandomGif);
+</script>
+  <img id="randomGif" src="assets/gif.gif" alt="Random GIF" style="display:none; position:fixed; top:50%; left:50%; transform-origin:center; pointer-events:none;">
 </body>
 </html>
