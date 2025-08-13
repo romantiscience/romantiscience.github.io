@@ -90,13 +90,13 @@ a:hover {
     const panel=document.querySelector('.panel');
     const panelContent=panel.querySelector('.panel-content');
     const closeBtn=panel.querySelector('.close');
-    const tabs=['New','Bio','Design','Text','Audio','Video','Contact'];
+    const tabs=['Bio','Book','Design','Text','Audio','Video','Photo','Contact'];
     nav.innerHTML=tabs.map(t=>`<a href="#" data-tab="${t}">${t}</a>`).join('');
 
     // NEW: distinct content for each tab (replace placeholders with your real content)
     const tabContent = {
-      'New': `
-        <div class="panel-head">New</div>
+      'Bio': `
+        <div class="panel-head">Bio</div>
         <div class="panel-body">
           <p>Fresh updates and releases.</p>
           <ul>
@@ -105,8 +105,8 @@ a:hover {
             <li><strong>Notes</strong> — behind‑the‑scenes sketches. <a href="#">Read</a></li>
           </ul>
         </div>`,
-      'Bio': `
-        <div class="panel-head">Bio</div>
+      'Book': `
+        <div class="panel-head">Books</div>
         <div class="panel-body">
           <p>Jesse Young is a designer and multidisciplinary artist working across image, interface and sound.</p>
           <p>Currently focused on lightweight interactive systems and experimental cameras.</p>
@@ -192,6 +192,16 @@ a:hover {
         <div class="panel-body">
           <p>Shorts and experiments.</p>
         </div>`,
+         'Photo': `
+        <div class="panel-head">Bio</div>
+        <div class="panel-body">
+          <p>Fresh updates and releases.</p>
+          <ul>
+            <li><strong>Project Orion</strong> — interactive photo essay. <a href="#">View</a></li>
+            <li><strong>Gallery Pop-up</strong> — two-night screening. <a href="#">Details</a></li>
+            <li><strong>Notes</strong> — behind‑the‑scenes sketches. <a href="#">Read</a></li>
+          </ul>
+        </div>`,
       'Contact': `
         <div class="panel-head">Contact</div>
         <div class="panel-body">
@@ -214,7 +224,7 @@ function showPanel(tab){
   `;
 
   // --- TEXT TAB: Lazy-load Google Drive PDF ---
-  if(tab === 'Text'){
+  if(tab === 'Book'){
     const container = document.getElementById('text-pdf-container');
     if(container){
       container.innerHTML = ''; // Clear any existing iframe
@@ -244,7 +254,7 @@ function showPanel(tab){
   }
 
   // --- PHOTO TAB: Lazy-load NanoGallery2 ---
-  if(tab === 'Bio'){
+  if(tab === 'Photo'){
     const container = document.getElementById('photos');
     if(container){
       const originalHTML = `
