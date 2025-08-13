@@ -12,6 +12,15 @@
     --accent-yellow:#ffff00;
     --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
   }
+    /* Make all links readable on dark background */
+a {
+  color: var(--accent-blue); /* or pick any bright color */
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--accent-green); /* hover color */
+}
   html,body{height:100%;margin:0;background:#000;color:#fff;overflow:hidden;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
 
   /* Top bar (white bar as requested) */
