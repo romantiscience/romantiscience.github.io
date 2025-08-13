@@ -103,12 +103,14 @@ a:hover {
         <div class="panel-body">
           <p>Jesse Young is a designer and multidisciplinary artist working across image, interface and sound.</p>
           <p>Currently focused on lightweight interactive systems and experimental cameras.</p>
+          <div id="photos"></div>
           <p><a href="mailto:hello@example.com">Email</a> for a full CV.</p>
         </div>`,
       'Design': `
         <div class="panel-head">Design</div>
         <div class="panel-body">
           <p>Selected design work.</p>
+          <div id="design-pdf-container" style="width:100%; height:800px;"></div>
           <ul>
             <li>Brand + site for <a href="#">Studio Delta</a></li>
             <li>WebGL mini-experience: <a href="#">Wireframe Camera</a></li>
@@ -119,7 +121,7 @@ a:hover {
         <div class="panel-head">Text</div>
         <div class="panel-body">
         <p> butt and butt test</p>
-          <div id="pdf-container" style="width:100%; height:800px;"></div>
+<div id="text-pdf-container" style="width:100%; height:800px;"></div>
           <ul>
             <li><a href="#">Tape Loops Vol. 1</a></li>
             <li><a href="#">Contact mic study</a></li>
@@ -140,41 +142,6 @@ a:hover {
         <div class="panel-head">Video</div>
         <div class="panel-body">
           <p>Shorts and experiments.</p>
-                <h1>Gallery made with nanogallery2</h1>
-
-    <div ID="photos" data-nanogallery2='{
-        "itemsBaseURL": "https://romantiscience.github.io/",
-        "thumbnailWidth": "200",
-        "colorScheme": {
-          "thumbnail": {
-            "background": "rgba(0,0,0,1)"
-          }
-        },
-        "thumbnailLabel": {
-          "position": "overImageOnBottom",
-          "displayDescription": true
-        },
-        "galleryDisplayMode": "pagination",
-        "galleryMaxRows": 1,
-        "galleryPaginationMode": "dots",
-        "thumbnailAlignment": "center",
-        "galleryMaxItems": 6,
-        "displayBreadcrumb": false,
-        "breadcrumbAutoHideTopLevel": false,
-        "breadcrumbOnlyCurrentLevel": false,
-        "thumbnailOpenImage": true
-      }'>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Hutong scene ">Beijing 1</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Cats ">Beijing 2</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="I saw a monkey ">Beijing 3</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Who?">Beijing 4</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Who?">Beijing 4</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="What is this ">Beijing 5</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="What is this ">Beijing 5</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Take it ">Beijing 6</a>
-      <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Take it ">Beijing 6</a>
-
-    </div>
         </div>`,
       'Contact': `
         <div class="panel-head">Contact</div>
@@ -187,24 +154,81 @@ a:hover {
           </ul>
         </div>`
     };
-// Lazy-load flag for PDF
-let pdfLoaded = false;
-
 function showPanel(tab){
-  // Open the panel
   panel.classList.add('open');
   panel.setAttribute('aria-hidden','false');
 
-  // Inject the tab content
+  // Insert the tab content
   panelContent.innerHTML = tabContent[tab] || `
     <div class="panel-head">${tab}</div>
     <div class="panel-body"><p>Content for ${tab} coming soon.</p ></div>
   `;
 
-  // Lazy-load PDF only for 'Text' tab
-  if(tab === 'Text' && !pdfLoaded){
-    PDFObject.embed("/assets/emotion.pdf", "#pdf-container");
-    pdfLoaded = true;
+  // --- TEXT TAB: Lazy-load Google Drive PDF ---
+  if(tab === 'Text'){
+    const container = document.getElementById('text-pdf-container');
+    if(container){
+      container.innerHTML = ''; // Clear any existing iframe
+      const textFileId = '1w0q54fgXkgNNL3IG_S7QzNR6hY9IyUZ'; // Replace with your Google Drive file ID
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://drive.google.com/file/d/${textFileId}/preview`;
+      iframe.width = "100%";
+      iframe.height = "800";
+      iframe.style.border = "none";
+      container.appendChild(iframe);
+    }
+  }
+
+  // --- DESIGN TAB: Lazy-load Google Drive PDF ---
+  if(tab === 'Design'){
+    const container = document.getElementById('design-pdf-container');
+    if(container){
+      container.innerHTML = ''; // Clear any existing iframe
+      const designFileId = '1Bvj3KRmyQWKjkRiKAv0hAH6b8eaDEK63'; // Replace with your Google Drive file ID
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://drive.google.com/file/d/${designFileId}/preview`;
+      iframe.width = "100%";
+      iframe.height = "800";
+      iframe.style.border = "none";
+      container.appendChild(iframe);
+    }
+  }
+
+  // --- PHOTO TAB: Lazy-load NanoGallery2 ---
+  if(tab === 'Bio'){
+    const container = document.getElementById('photos');
+    if(container){
+      const originalHTML = `
+        <a href=" " data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Hutong scene">Beijing 1</a >
+        <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Cats">Beijing 2</a >
+        <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="I saw a monkey">Beijing 3</a >
+        <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Who?">Beijing 4</a >
+        <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="What is this">Beijing 5</a >
+        <a href="gallery/b1.JPG" data-ngthumb="gallery/thumbnails/1.PNG" data-ngdesc="Take it">Beijing 6</a >
+      `;
+      container.innerHTML = originalHTML; // Reset gallery links
+
+      $(container).nanogallery2({
+        itemsBaseURL: "https://romantiscience.github.io/",
+        thumbnailWidth: 200,
+        colorScheme: {
+          thumbnail: { background: "rgba(0,0,0,1)" }
+        },
+        thumbnailLabel: {
+          position: "overImageOnBottom",
+          displayDescription: true
+        },
+        galleryDisplayMode: "pagination",
+        galleryMaxRows: 1,
+        galleryPaginationMode: "dots",
+        thumbnailAlignment: "center",
+        galleryMaxItems: 6,
+        displayBreadcrumb: false,
+        breadcrumbAutoHideTopLevel: false,
+        breadcrumbOnlyCurrentLevel: false,
+        thumbnailOpenImage: true
+      });
+    }
   }
 }
     menuBtn.addEventListener('click', ()=> nav.classList.toggle('open'));
@@ -368,6 +392,5 @@ function showRandomGif() {
 window.addEventListener('load', showRandomGif);
 </script>
   <img id="randomGif" src="assets/gif.gif" alt="Random GIF" style="display:none; position:fixed; top:50%; left:50%; transform-origin:center; pointer-events:none;">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.8/pdfobject.min.js"></script>
 </body>
 </html>
