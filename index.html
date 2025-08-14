@@ -425,7 +425,7 @@ function showPanel(tab){
     window._CAM = { renderer, scene, cameraModel, camLeft, camRight };
   })();
   </script>
-<img id="randomGif" src="assets/gif.gif" alt="Random GIF"
+<img id="randomGif" src="assets/staticjesse.PNG" alt="Random GIF"
      style="display:none; position:fixed; top:50%; left:50%; transform-origin:center; pointer-events:none;">
 
 <script>
@@ -438,7 +438,7 @@ function showGif(force = false) {
   const gif = document.getElementById('randomGif');
 
   // Force reload so animation restarts
-  gif.src = 'assets/gif.gif?cacheBust=' + Date.now();
+  gif.src = 'assets/staticjesse.PNG?cacheBust=' + Date.now();
 
   // Random size 30%–100%
   const sizePercent = Math.random() * 70 + 30;
